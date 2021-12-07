@@ -1,0 +1,9 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - CONFIG_CENTER_ENABLED=true
+      - CONFIG_CENTER_BASE_URL=http://10.3.7.222:5062

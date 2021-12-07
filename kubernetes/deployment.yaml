@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: approval
+  namespace: utility
+  labels:
+    app: approval
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: approval
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+  template:
+    metadata:
+      labels:
+        app: approval
+    spec:
+      containers:
+        - name: approval
+          image: 10.32.42.225:5000/approval:<VERSION>
+          ports:
+            - containerPort: 8000
+          env:
+          - name: env
+            value: "charite"
+          - name: CONFIG_CENTER_ENABLED
+            value: "true"
+          - name: CONFIG_CENTER_BASE_URL
+            value: "http://common.utility:5062/"
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "1000Mi"
+              cpu: "1"
+            limits:
+              memory: "1000Mi"
+              cpu: "1"
+      nodeSelector:
+        namespace: utility
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: approval
+  namespace: utility
+  labels:
+    app: approval
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+  selector:
+    app: approval
+  type: LoadBalancer
