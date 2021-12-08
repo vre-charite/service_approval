@@ -6,7 +6,7 @@ from fastapi_utils import cbv
 
 from app.commons.logger_services.logger_factory_service import SrvLoggerFactory
 from app.commons.neo4j_services import bulk_get_by_geids, get_files_recursive, get_node_by_geid
-from app.commons.psql_services import create_entity_from_node, get_all_sub_files, update_files_sql
+from app.commons.psql_services import create_entity_from_node, get_all_sub_files, update_files_sql, get_all_sub_folder_nodes
 from app.commons.pipeline_ops.copy import trigger_copy_pipeline
 from app.models.base import APIResponse, EAPIResponseCode
 from app.models.copy_request import (GETRequest, GETRequestFiles, GETRequestFilesResponse, GETRequestResponse,
@@ -184,9 +184,9 @@ class APICopyRequest:
         api_response = APIResponse()
         review_status = data.review_status
 
-        approved = db.session.query(EntityModel).filter_by(request_id=data.request_id, review_status="approved")
-        denied = db.session.query(EntityModel).filter_by(request_id=data.request_id, review_status="denied")
-        skipped_data = {"approved": approved.count(), "denied": denied.count()}
+        approved = get_all_sub_folder_nodes(data.request_id, data.entity_geids, "approved")
+        denied = get_all_sub_folder_nodes(data.request_id, data.entity_geids, "denied")
+        skipped_data = {"approved": len(approved), "denied": len(denied)}
 
         file_geids = get_all_sub_files(data.request_id, data.entity_geids)
         result = update_files_sql(data.request_id, review_status, data.username, file_geids)

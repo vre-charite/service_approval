@@ -31,6 +31,32 @@ def get_all_sub_files(request_id: str, entity_geids: list[str]) -> list[str]:
     return file_geids
 
 
+def get_sql_file_nodes_recursive(request_id: str, folder_geid: str, review_status: str, files: list=None) -> list[EntityModel]:
+    if not files:
+        files = []
+
+    entities = db.session.query(EntityModel).filter_by(request_id=request_id, parent_geid=folder_geid)
+    for entity in entities:
+        if entity.entity_type == "file":
+            if entity.review_status == review_status:
+                files.append(entity.entity_geid)
+        else:
+            files = get_sql_file_nodes_recursive(request_id, entity.entity_geid, review_status, files=files)
+    return files
+
+
+def get_all_sub_folder_nodes(request_id: str, entity_geids: list[str], review_status: str) -> list[str]:
+    entities = db.session.query(EntityModel).filter_by(request_id=request_id).filter(
+        EntityModel.entity_geid.in_(entity_geids)
+    )
+    files = []
+    for entity in entities:
+        if entity.entity_type == "folder":
+            # Get all files in subfolder
+            files = get_sql_file_nodes_recursive(request_id, entity.entity_geid, review_status, files=files)
+    return files
+
+
 def update_files_sql(request_id: str, review_status: str, username: str, file_geids: list[str]) -> int:
     review_data = {
         "review_status": review_status,
