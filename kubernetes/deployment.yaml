@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: approval
-          image: 10.32.42.225:5000/approval:<VERSION>
+          image: s-hdp-vre-v007.charite.de/approval:<VERSION>
           ports:
             - containerPort: 8000
           env:
