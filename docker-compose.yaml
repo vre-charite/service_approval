@@ -1,9 +1,50 @@
+// Copyright 2022 Indoc Research
+// 
+// Licensed under the EUPL, Version 1.2 or – as soon they
+// will be approved by the European Commission - subsequent
+// versions of the EUPL (the "Licence");
+// You may not use this work except in compliance with the
+// Licence.
+// You may obtain a copy of the Licence at:
+// 
+// https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+// 
+// Unless required by applicable law or agreed to in
+// writing, software distributed under the Licence is
+// distributed on an "AS IS" basis,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+// express or implied.
+// See the Licence for the specific language governing
+// permissions and limitations under the Licence.
+// 
+
 version: '3'
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        pip_username: ${PIP_USERNAME}
+        pip_password: ${PIP_PASSWORD}
     ports:
       - "8000:8000"
     environment:
-      - CONFIG_CENTER_ENABLED=true
+      - env="dev"
+      - port=8000
+      - CONFIG_CENTER_ENABLED=false
       - CONFIG_CENTER_BASE_URL=http://10.3.7.222:5062
+      - RDS_DB_URI=postgresql://postgres:postgres@db:5432/approval_db
+      - RDS_SCHEMA_DEFAULT=test_schema
+      - NEO4J_SERVICE=http://127.0.0.1
+      - DATA_OPS_UTIL=http://127.0.0.1
+      - EMAIL_SERVICE=http://127.0.0.1
+      - UTILITY_SERVICE=http://127.0.0.1
+  db:
+    image: 'postgres:14.1'
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql

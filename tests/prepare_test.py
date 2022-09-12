@@ -1,3 +1,23 @@
+# Copyright 2022 Indoc Research
+# 
+# Licensed under the EUPL, Version 1.2 or – as soon they
+# will be approved by the European Commission - subsequent
+# versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the
+# Licence.
+# You may obtain a copy of the Licence at:
+# 
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+# 
+# Unless required by applicable law or agreed to in
+# writing, software distributed under the Licence is
+# distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied.
+# See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+# 
+
 import requests
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -68,7 +88,7 @@ class SetUpTest:
             "name":"admin",
             "project_code":project_name,
             "uploader":"admin",
-            "extra_labels": ["Greenroom"]
+            "extra_labels": [ConfigClass.GREEN_ZONE_LABEL]
         }
         test_name_node = requests.post(ConfigClass.NEO4J_SERVICE + "nodes/Folder", json=test_payload)
         test_name_node = test_name_node.json()[0]
@@ -83,7 +103,7 @@ class SetUpTest:
             "name":"admin",
             "project_code":project_name,
             "uploader":"admin",
-            "extra_labels": ["VRECore"]
+            "extra_labels": [ConfigClass.CORE_ZONE_LABEL]
         }
         test_core_name_node = requests.post(ConfigClass.NEO4J_SERVICE + "nodes/Folder", json=test_payload)
         test_core_name_node = test_core_name_node.json()[0]
@@ -99,7 +119,7 @@ class SetUpTest:
             "name":"folder1",
             "project_code":project_name,
             "uploader":"admin",
-            "extra_labels": ["Greenroom"]
+            "extra_labels": [ConfigClass.GREEN_ZONE_LABEL]
         }
         test_folder_node = requests.post(ConfigClass.NEO4J_SERVICE + "nodes/Folder", json=test_payload)
         test_folder_node = test_folder_node.json()[0]
@@ -112,12 +132,12 @@ class SetUpTest:
             "file_size": 1,
             "global_entity_id":get_geid(),
             "list_priority": 20,
-            "location": "minio://http://10.3.7.220/gr-jun29test/admin/hello123/Android.svg",
+            "location": "minio://http://127.0.0.1/gr-jun29test/admin/hello123/Android.svg",
             "name": "file1",
             "operator":"admin",
             "project_code": project_name,
             "uploader": "admin",
-            "extra_labels": ["Greenroom"],
+            "extra_labels": [ConfigClass.GREEN_ZONE_LABEL],
             "parent_folder_geid": test_folder_node["global_entity_id"]
         }
         test_file_node_1 = requests.post(ConfigClass.NEO4J_SERVICE + "nodes/File", json=test_payload)
@@ -129,12 +149,12 @@ class SetUpTest:
             "file_size": 1,
             "global_entity_id":get_geid(),
             "list_priority": 10,
-            "location": "minio://http://10.3.7.220/gr-jun29test/admin/hello123/Android.svg",
+            "location": "minio://http://127.0.0.1/gr-jun29test/admin/hello123/Android.svg",
             "name": "file2",
             "operator":"admin",
             "project_code": project_name,
             "uploader": "admin",
-            "extra_labels": ["Greenroom"],
+            "extra_labels": [ConfigClass.GREEN_ZONE_LABEL],
             "parent_folder_geid": test_name_node["global_entity_id"]
         }
         test_file_node_2 = requests.post(ConfigClass.NEO4J_SERVICE + "nodes/File", json=test_payload)

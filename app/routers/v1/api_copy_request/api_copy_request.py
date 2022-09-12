@@ -1,3 +1,23 @@
+# Copyright 2022 Indoc Research
+# 
+# Licensed under the EUPL, Version 1.2 or – as soon they
+# will be approved by the European Commission - subsequent
+# versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the
+# Licence.
+# You may obtain a copy of the Licence at:
+# 
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+# 
+# Unless required by applicable law or agreed to in
+# writing, software distributed under the Licence is
+# distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied.
+# See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+# 
+
 import math
 
 from fastapi import APIRouter, Depends, Request
@@ -132,7 +152,7 @@ class APICopyRequest:
         if params.parent_geid:
             entity_geid = params.parent_geid
             while entity_geid:
-                file = db.session.query(EntityModel).filter_by(entity_geid=entity_geid).first()
+                file = db.session.query(EntityModel).filter_by(request_id=params.request_id, entity_geid=entity_geid).first()
                 routing.append(file.to_dict())
                 entity_geid = file.parent_geid
 
@@ -154,7 +174,6 @@ class APICopyRequest:
         denied = db.session.query(EntityModel).filter_by(request_id=data.request_id, review_status="denied")
         skipped_data = {"approved": approved.count(), "denied": denied.count()}
 
-        file_geids = []
         entities = db.session.query(EntityModel).filter_by(request_id=data.request_id, review_status="pending")
         file_geids = [i.entity_geid for i in entities]
         result = update_files_sql(data.request_id, review_status, data.username, file_geids)
@@ -165,12 +184,21 @@ class APICopyRequest:
             if top_level_geids:
                 # Send top level file/folder geids to copy pipeline
                 logger.info(f"Triggering pipeline for {top_level_geids}")
-                request_obj = db.session.query(RequestModel).get(data.request_id)
+                request_obj: RequestModel = db.session.query(RequestModel).get(data.request_id)
                 auth = {
                     "Authorization": request.headers.get("Authorization").replace("Bearer ", ""),
                     "Refresh-Token": request.headers.get("Refresh-Token"),
                 }
-                copy_result = trigger_copy_pipeline(request_obj, top_level_geids, data.username, data.session_id, auth)
+                copy_result = trigger_copy_pipeline(
+                    str(request_obj.id),
+                    request_obj.project_geid,
+                    request_obj.source_geid,
+                    request_obj.destination_geid,
+                    top_level_geids,
+                    data.username,
+                    data.session_id,
+                    auth,
+                )
                 logger.info(f"Pipeline trigger for {len(copy_result)} files")
 
         skipped_data["updated"] = result
@@ -195,17 +223,20 @@ class APICopyRequest:
             if data.entity_geids:
                 # Send geid's of file/folders submitted by frontend to copy pipeline
                 logger.info(f"Triggering pipeline for {data.entity_geids}")
-                request_obj = db.session.query(RequestModel).get(data.request_id)
+                request_obj: RequestModel = db.session.query(RequestModel).get(data.request_id)
                 auth = {
                     "Authorization": request.headers.get("Authorization").replace("Bearer ", ""),
                     "Refresh-Token": request.headers.get("Refresh-Token"),
                 }
                 copy_result = trigger_copy_pipeline(
-                    request_obj,
+                    str(request_obj.id),
+                    request_obj.project_geid,
+                    request_obj.source_geid,
+                    request_obj.destination_geid,
                     data.entity_geids,
                     data.username,
                     data.session_id,
-                    auth
+                    auth,
                 )
                 logger.info(f"Pipeline trigger for {len(copy_result)} files")
         skipped_data["updated"] = result

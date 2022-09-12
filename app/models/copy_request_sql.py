@@ -1,3 +1,23 @@
+# Copyright 2022 Indoc Research
+# 
+# Licensed under the EUPL, Version 1.2 or – as soon they
+# will be approved by the European Commission - subsequent
+# versions of the EUPL (the "Licence");
+# You may not use this work except in compliance with the
+# Licence.
+# You may obtain a copy of the Licence at:
+# 
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+# 
+# Unless required by applicable law or agreed to in
+# writing, software distributed under the Licence is
+# distributed on an "AS IS" basis,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied.
+# See the Licence for the specific language governing
+# permissions and limitations under the Licence.
+# 
+
 from fastapi_sqlalchemy import db
 from sqlalchemy import Column, String, Date, DateTime, Integer, Boolean, ForeignKey, BigInteger
 from sqlalchemy.sql.schema import UniqueConstraint
@@ -24,7 +44,7 @@ class RequestModel(Base):
     source_path = Column(String())
     review_notes = Column(String())
     completed_by = Column(String())
-    completed_at = Column(String())
+    completed_at = Column(DateTime())
 
     def to_dict(self):
         result = {}
@@ -55,7 +75,7 @@ class EntityModel(Base):
     copy_status = Column(String())
     name = Column(String())
     uploaded_by = Column(String(), nullable=True)
-    generate_id = Column(String(), nullable=True)
+    dcm_id = Column(String(), nullable=True)
     uploaded_at = Column(DateTime(), default=datetime.utcnow)
     file_size = Column(BigInteger(), nullable=True)
 

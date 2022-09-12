@@ -18,11 +18,5 @@
 // permissions and limitations under the Licence.
 // 
 
-pytest==6.1.1
-pytest-env==0.6.2
-pytest-asyncio==0.17.2
-pytest-dependency==0.5.1
-requests-mock==1.9.3
-mock==4.0.3
-sqlalchemy-utils==0.38.2
-testcontainers==3.4.2
+--index-url https://${PIP_USERNAME}:${PIP_PASSWORD}@git.indocresearch.org/api/v4/groups/pilot/-/packages/pypi/simple
+common==0.0.19
